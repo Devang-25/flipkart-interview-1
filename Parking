@@ -1,0 +1,178 @@
+package geeksforgeeks;
+
+import java.io.*;
+import java.util.*;
+import java.text.*;
+import java.math.*;
+import java.util.regex.*;
+
+public class Solution {
+    
+	
+    public static void main(String args[] ) throws Exception {
+        /* Enter your code here. Read input from STDIN. Print output to STDOUT */
+        Scanner sc = new Scanner(System.in);
+        int floor = sc.nextInt();
+        int row = sc.nextInt();
+        int col = sc.nextInt();
+       Parking parking = new Parking(floor, row, col);
+        int t = sc.nextInt();
+        while(t>0)
+        {
+            int input= sc.nextInt();
+            if(input==1)
+            {
+                //enter
+            	parking.park();                
+            }
+            else
+            {
+                //exit
+                int f = sc.nextInt();
+                int r = sc.nextInt();
+                int c = sc.nextInt();
+                parking.unpark(f, r, c); 
+            }
+            
+            t--;
+        }
+    }
+}
+class Parking {
+	
+	int capacity;
+	int minFloor;
+	ArrayList<ParkingFloor> floors;
+	public Parking(int floor, int row, int col)
+	{
+		this.floors = new ArrayList<>();
+		for(int i =0;i<floor;i++)
+		{
+			floors.add(new ParkingFloor(row, col));
+		}
+		this.minFloor = 0;
+		this.capacity = floor*row*col;
+	}
+	public void park()
+	{
+		System.out.print(minFloor);
+		ParkingFloor floor = this.floors.get(minFloor);
+		floor.park();
+		this.capacity--;
+		this.floors.set(minFloor, floor);
+		for(int i=0;i<this.floors.size();i++)
+		{
+			if(this.floors.get(i).capacity>0)
+			{
+				this.minFloor=i;
+				break;
+			}
+		}
+	}
+	public void unpark(int f,int r,int c) {
+		ParkingFloor floor = this.floors.get(f);
+		floor.unpark(r, c);
+		this.capacity++;
+		this.floors.set(f, floor);
+		for(int i=0;i<this.floors.size();i++)
+		{
+			if(this.floors.get(i).capacity>0)
+			{
+				this.minFloor=i;
+				break;
+			}
+		}
+	}
+}
+class ParkingFloor{
+	int capacity;
+	int minRow;
+	ArrayList<ParkingRow> rows;
+	public ParkingFloor(int row, int col)
+	{
+		this.rows = new ArrayList<>();
+		for(int i=0;i<row;i++)
+		{
+			rows.add(new ParkingRow(col));
+		}
+		this.minRow = 0;
+		this.capacity = row*col;		
+	}
+	public void unpark(int row, int col)
+	{
+		ParkingRow from = this.rows.get(row);
+		from.unpark(col);;
+		this.capacity++;
+		this.rows.set(row, from);
+		int min= Integer.MAX_VALUE;
+		int rowSize= this.rows.size();
+		int newMinRow =-1;
+		for(int i =0;i<rowSize;i++)
+		{
+			ParkingRow r = this.rows.get(i);
+			
+			if(r.capacity>0)
+			{
+				int minCol= r.minCol;
+				if( (minCol+i) < min)
+				{
+					min = minCol+i;
+					newMinRow=i;
+				}
+			}
+		}
+		this.minRow =newMinRow;
+	}
+	public void park() {
+		System.out.print(minRow);
+		ParkingRow row = this.rows.get(minRow);
+		row.park();
+		this.capacity--;
+		this.rows.set(minRow, row);
+		int min= Integer.MAX_VALUE;
+		for(int i =0;i<this.rows.size();i++)
+		{
+			ParkingRow r = this.rows.get(i);
+			
+			if(r.capacity>0)
+			{
+				int minCol= r.minCol;
+				if( (minCol+i) < min)
+				{
+					min = minCol+i;
+					this.minRow=i;
+				}
+			}
+		}
+	}
+		
+}
+class ParkingRow{
+	int capacity;
+	int minCol;
+	ArrayList<Integer> cols;
+	public ParkingRow(int col) {
+		this.cols = new ArrayList<>();
+		for(int i=0;i<col;i++)
+		{
+			cols.add(0);
+		}
+		this.minCol = 0;
+		this.capacity = col;
+	}
+	public void park() {
+		System.out.print(minCol);		
+		this.cols.set(minCol,1);
+		this.capacity--;
+		if(this.capacity>0)
+		{
+			this.minCol= this.cols.indexOf(0);
+		}
+	}
+	public void unpark(int col)
+	{		
+		this.cols.set(col, 0);
+		this.capacity++;
+		this.minCol = this.cols.indexOf(0);
+	}	
+}
